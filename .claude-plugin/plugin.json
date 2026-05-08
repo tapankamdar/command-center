@@ -1,0 +1,11 @@
+{
+  "name": "command-center",
+  "version": "0.3.0",
+  "description": "A morning brief plugin for Claude Cowork. Pulls signals from Gmail, Slack, Google Calendar, Granola, Grain, and Notion into one structured daily brief with a saved to-do file.",
+  "author": {
+    "name": "Tapan Kamdar"
+  },
+  "homepage": "https://github.com/tapankamdar/command-center",
+  "license": "MIT",
+  "keywords": ["morning brief", "inbox", "calendar", "productivity", "daily summary", "todo"]
+}
