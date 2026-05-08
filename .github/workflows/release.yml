@@ -1,0 +1,25 @@
+name: Build and release plugin
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build .plugin file
+        run: |
+          zip -r command-center.plugin . \
+            --exclude "*.DS_Store" \
+            --exclude ".git/*" \
+            --exclude ".github/*"
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: command-center.plugin
