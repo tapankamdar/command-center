@@ -1,20 +1,6 @@
 # Command Center
 
-A morning brief plugin for [Claude Cowork](https://claude.ai). Pulls from your inbox, calendar, and meeting notes to tell you exactly what needs your attention — before the day gets away from you.
-
----
-
-## What it does
-
-Command Center runs four modules each morning and delivers a structured brief in chat, plus a saved to-do file.
-
-**Who needs something from you** — Scans Gmail and Slack for the last 24 hours. Cuts through automated noise and surfaces the messages where a real person is waiting on a response or decision, with a short drafted reply for each one.
-
-**Today's calendar** — Pulls every meeting on today's calendar. For each one: who confirmed, who declined, who has not responded. If Notion is connected, fetches and summarizes linked agendas or meeting docs so you know what you are walking into.
-
-**Commitments from yesterday** — Reads Granola and/or Grain meeting notes from yesterday and extracts every action item you are responsible for. These go straight into your to-do file.
-
-**High-stakes meetings this week** — Scans the next 7 days for meetings with VPs, your manager, or external executives. Lists a specific prep action for each one so nothing sneaks up on you.
+A morning brief plugin for Claude Cowork. Pulls from your inbox, calendar, and meeting notes to tell you exactly what needs your attention — before the day gets away from you.
 
 ---
 
@@ -43,6 +29,113 @@ claude plugin marketplace add tapankamdar/command-center
 # Step 2: Install the plugin
 claude plugin install command-center@command-center
 ```
+
+---
+
+## Skills & Commands
+
+Two skills with distinct purposes. Run the morning brief once at the start of your day. Use the check-in any number of times after that.
+
+---
+
+### 1. Morning Brief (`/morning-brief`)
+
+Pulls from Gmail, Slack, Google Calendar, and your meeting notes to set up your day. Returns four sections: who needs something from you, what you are walking into today, what you committed to yesterday, and which meetings this week need prep. Saves a to-do file you can open and check off.
+
+**Natural language triggers:**
+- "run my morning brief"
+- "Command Center"
+- "start my day"
+- "what do I need to know today"
+- "daily brief"
+- "catch me up — I've been out"
+
+**Examples:**
+
+> *"Run my morning brief."*
+
+Pulls your inbox, calendar, and meeting notes. Returns a four-section brief with a to-do file saved to your output folder.
+
+> *"Catch me up — I've been out sick for two days."*
+
+Works the same way. Say how far back you need to look and it adjusts the fetch window accordingly.
+
+> *"Command Center, but focus on anything related to the Accenture deal."*
+
+Runs the full brief and weights the output toward messages, meetings, and commitments connected to that topic.
+
+> *"Run my morning brief and email it to me too."*
+
+Runs the brief, saves the to-do file, and sends it to your Gmail address — even if `COMMAND_CENTER_EMAIL_DIGEST` is not set.
+
+> `/morning-brief`
+
+Runs the full brief immediately.
+
+> `/morning-brief focus on anything urgent from the VP of Sales`
+
+Runs the full brief with extra weight on messages from that person.
+
+---
+
+### 2. Check-In (`/check-in`)
+
+Runs at any point after the morning brief. Shows what you have already knocked out, surfaces only new messages and calendar changes since your last run, and hands you an updated to-do list for the rest of the day. Does not repeat the full morning pull.
+
+**Natural language triggers:**
+- "check in"
+- "what's new since this morning"
+- "what have I missed"
+- "any updates"
+- "how am I doing today"
+- "what's left on my list"
+- "catch me up"
+
+**Examples:**
+
+> *"Check in."*
+
+Reads your to-do file to find what you have completed, fetches only what arrived since your last run, and returns three sections: wins so far, new messages, and your remaining open items.
+
+> *"What's new since this morning?"*
+
+Same as above. Scoped to only what has arrived since the morning brief ran.
+
+> *"How am I doing — and what still needs my attention?"*
+
+Shows completed items first, then the updated open list with any new items appended.
+
+> *"Check in and email me the update."*
+
+Delivers the check-in brief to your Gmail inbox in addition to showing it in chat.
+
+> `/check-in`
+
+Runs the check-in immediately.
+
+> `/check-in any new messages from the engineering team?`
+
+Runs the check-in with extra attention to messages from that group.
+
+---
+
+## Scheduling
+
+To run the morning brief automatically each day, say:
+
+> *"Schedule my morning brief to run every day at 8am."*
+
+Cowork's schedule skill sets up a recurring task that calls `/morning-brief` at that time and delivers the brief inline. You will see it in chat each morning without having to ask.
+
+To change or pause the schedule:
+
+> *"Change my morning brief to 7:30am."*
+
+> *"Pause my morning brief schedule for this week."*
+
+> *"Cancel my morning brief schedule."*
+
+The check-in does not need to be scheduled. Run it on demand throughout the day whenever you want a pulse check.
 
 ---
 
@@ -91,88 +184,6 @@ export COMMAND_CENTER_EMAIL_DIGEST=true
 ```
 
 When enabled, the brief is sent immediately after generation. Subject: `Command Center — Day, Date`.
-
----
-
-## Skills
-
-Command Center has two skills with distinct purposes. The morning brief runs once at the start of the day. The check-in can run any number of times after that.
-
----
-
-### Morning Brief
-
-Runs a full pull from all connected sources and sets up your day. Saves a fresh to-do file and records the run timestamp so the check-in knows where to pick up.
-
-**Natural language triggers:**
-- "run my morning brief"
-- "Command Center"
-- "start my day"
-- "what do I need to know today"
-- "daily brief"
-
-**Examples:**
-
-> *"Run my morning brief."*
-
-Claude pulls your inbox, calendar, and meeting notes and returns a four-section brief with a to-do file saved to your output folder.
-
-> *"Catch me up — I've been out sick for two days."*
-
-Works the same way. If you need a longer lookback window, just say so and Claude adjusts the data fetch accordingly.
-
-> *"Command Center, but focus on anything related to the Accenture deal."*
-
-Runs the full brief and weights the synthesis toward messages, meetings, and commitments connected to that topic.
-
-> *"Run my morning brief and email it to me too."*
-
-Runs the brief, saves the to-do file, and sends it to your own Gmail address — even if `COMMAND_CENTER_EMAIL_DIGEST` is not set as an env var.
-
----
-
-### Check-In
-
-Runs at any point after the morning brief. Shows what you have already completed, surfaces only new messages and calendar changes since your last run, and hands you an updated to-do list for the rest of the day.
-
-**Natural language triggers:**
-- "check in"
-- "what's new since this morning"
-- "what have I missed"
-- "any updates"
-- "how am I doing today"
-- "what's left on my list"
-- "catch me up"
-
-**Examples:**
-
-> *"Check in."*
-
-Claude reads your to-do file to find what you have completed, fetches only what arrived since your last run, and returns a three-section update: wins so far, new messages, and your remaining open items.
-
-> *"What's new since this morning?"*
-
-Same as above. Scoped to only what has arrived since the morning brief ran.
-
-> *"How am I doing — and what still needs my attention?"*
-
-Shows completed items first, then the updated open list with any new items appended.
-
-> *"Check in and email me the update."*
-
-Delivers the check-in brief to your own Gmail inbox in addition to showing it in chat.
-
----
-
-## Scheduling
-
-To run the morning brief automatically each day:
-
-> *"Schedule my morning brief to run every day at 8am"*
-
-The schedule skill sets up a recurring task that calls `morning-brief` and delivers the brief inline. The check-in skill does not need to be scheduled — run it on demand whenever you want a mid-day pulse check.
-
-You can adjust the time or pause the schedule any time.
 
 ---
 
