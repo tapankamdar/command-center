@@ -8,7 +8,7 @@ description: >
   starting brief and to-do file. For mid-day updates after the brief has already run,
   use the check-in skill instead.
 metadata:
-  version: "0.3.0"
+  version: "0.4.0"
 ---
 
 # Morning Brief
@@ -26,12 +26,30 @@ Resolve the output folder:
 Expand `~` to the user's home directory. Create the folder if it does not exist.
 
 Set `BRIEF_DATE` to today's date in YYYY-MM-DD format.
+Set `YESTERDAY` to the previous calendar day in YYYY-MM-DD format.
 Set `TODO_FILE` to `{OUTPUT_DIR}/todos-{BRIEF_DATE}.md`.
+Set `YESTERDAY_FILE` to `{OUTPUT_DIR}/todos-{YESTERDAY}.md`.
 Set `LAST_RUN_FILE` to `{OUTPUT_DIR}/last-run.txt`.
 
 Set `SEND_EMAIL` to true if the `COMMAND_CENTER_EMAIL_DIGEST` environment variable equals `true`, otherwise false.
 
 After completing the brief, write the current UTC timestamp to `LAST_RUN_FILE`, overwriting any existing content. The check-in skill reads this to know how far back to look.
+
+## Carry forward from previous runs
+
+Before fetching any live data, read `YESTERDAY_FILE` if it exists.
+
+Extract:
+- `INPROGRESS_ITEMS`: lines matching `- [>]` — tasks the user was actively working on
+- `OPEN_ITEMS`: lines matching `- [ ]` — tasks that were not started or completed
+
+These items carry forward into today's to-do file under a "Carried forward" section. In-progress items appear first, open items after. Include the source date in parentheses: `(from: Mon, May 8)`.
+
+If `YESTERDAY_FILE` does not exist, check for the most recent `todos-*.md` file in the output folder and use that instead. If no prior file exists, skip this step silently.
+
+Do not carry forward `- [x]` done items.
+
+Surface carried-forward items prominently in the brief. If there are in-progress items, open the brief with a short sentence noting what was already underway going into today.
 
 ## Fetch data
 
@@ -79,7 +97,9 @@ Write each section as plain prose with short paragraphs. Direct. No em dashes. L
 
 **Who needs something from you**
 
-Summarize the messages and threads where the user owes someone a response or a decision. Open with a brief paragraph on the overall inbox picture. Then list each pending item:
+If there are in-progress items carried forward from a prior run, open this section with one sentence naming what was already underway. For example: "You were mid-way through the Q3 forecast review and the Accenture proposal when yesterday ended."
+
+Then summarize the messages and threads where the user owes someone a response or a decision. List each pending item:
 
 - Who is waiting and what they need
 - A short reply the user could send, written in first person (see `references/output-format.md` for reply style guidance)
@@ -117,7 +137,11 @@ List meetings in the next 7 days with a VP or above, the user's manager, or an e
 
 ## Save and deliver
 
-Compile all action items from the first and third sections into a markdown checklist. Write to `TODO_FILE` using the format in `references/output-format.md`.
+Compile today's to-do file using the format in `references/output-format.md`. The file should include:
+1. Carried-forward items at the top (in-progress first, then open), each with `(from: [day, date])`
+2. New action items from the inbox and commitments sections
+
+Write to `TODO_FILE`.
 
 If `SEND_EMAIL` is true, compose an email to the user's own Gmail address. Subject: `Command Center -- {Day}, {Date}`. Body: the full brief as clean HTML. Send immediately and confirm with one line.
 
