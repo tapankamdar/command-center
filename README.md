@@ -42,6 +42,8 @@ Two skills with distinct purposes. Run the morning brief once at the start of yo
 
 Pulls from Gmail, Slack, Google Calendar, and your meeting notes to set up your day. Returns four sections: who needs something from you, what you are walking into today, what you committed to yesterday, and which meetings this week need prep. Saves a to-do file you can open and check off.
 
+Before fetching live data, the morning brief reads your previous day's to-do file and carries forward any tasks that were in progress or not yet started. In-progress items appear at the top of the new file. The brief opens with a sentence naming what was already underway so you pick up exactly where you left off.
+
 **Natural language triggers:**
 - "run my morning brief"
 - "Command Center"
@@ -54,7 +56,7 @@ Pulls from Gmail, Slack, Google Calendar, and your meeting notes to set up your 
 
 > *"Run my morning brief."*
 
-Pulls your inbox, calendar, and meeting notes. Returns a four-section brief with a to-do file saved to your output folder.
+Pulls your inbox, calendar, and meeting notes. Carries forward any in-progress or open tasks from yesterday. Returns a four-section brief with a to-do file saved to your output folder.
 
 > *"Catch me up — I've been out sick for two days."*
 
@@ -82,6 +84,8 @@ Runs the full brief with extra weight on messages from that person.
 
 Runs at any point after the morning brief. Shows what you have already knocked out, surfaces only new messages and calendar changes since your last run, and hands you an updated to-do list for the rest of the day. Does not repeat the full morning pull.
 
+You can also tell the check-in about progress you have made during the day. It updates your to-do file accordingly, and those updates carry forward into tomorrow's morning brief automatically.
+
 **Natural language triggers:**
 - "check in"
 - "what's new since this morning"
@@ -95,15 +99,19 @@ Runs at any point after the morning brief. Shows what you have already knocked o
 
 > *"Check in."*
 
-Reads your to-do file to find what you have completed, fetches only what arrived since your last run, and returns three sections: wins so far, new messages, and your remaining open items.
+Reads your to-do file to find what you have completed and what is in progress, fetches only what arrived since your last run, and returns three sections: wins so far, new messages, and your remaining open items.
+
+> *"Check in. I made progress on the Accenture proposal and finished the Q3 forecast."*
+
+Runs the check-in and updates your to-do file: the Accenture proposal moves to in-progress, the Q3 forecast is marked done. Both changes carry forward to tomorrow.
 
 > *"What's new since this morning?"*
 
-Same as above. Scoped to only what has arrived since the morning brief ran.
+Same as a standard check-in, scoped to only what has arrived since the morning brief ran.
 
 > *"How am I doing — and what still needs my attention?"*
 
-Shows completed items first, then the updated open list with any new items appended.
+Shows completed and in-progress items first, then the updated open list with any new items appended.
 
 > *"Check in and email me the update."*
 
@@ -113,9 +121,33 @@ Delivers the check-in brief to your Gmail inbox in addition to showing it in cha
 
 Runs the check-in immediately.
 
-> `/check-in any new messages from the engineering team?`
+> `/check-in I made progress on the onboarding redesign and can drop the compliance audit task`
 
-Runs the check-in with extra attention to messages from that group.
+Runs the check-in, marks onboarding as in-progress, and removes the compliance audit item.
+
+---
+
+## How task progress carries forward
+
+To-do items have three states:
+
+| Marker | Meaning |
+|--------|---------|
+| `- [ ]` | Open — not started |
+| `- [>]` | In progress — partially done, carries forward automatically |
+| `- [x]` | Done — complete, does not carry forward |
+
+Each morning, the brief reads the previous day's file and carries all `- [>]` and `- [ ]` items into the new day's to-do file under a "Carried forward" section. In-progress items appear first. Done items are left behind.
+
+You update task states by telling the check-in what happened:
+
+| What you say | What changes |
+|--------------|-------------|
+| "I made progress on X" / "I started X" / "I'm mid-way through X" | Marked `- [>]` in progress |
+| "I finished X" / "I completed X" / "Done with X" | Marked `- [x]` done |
+| "Drop X" / "X is no longer relevant" | Removed from the list |
+
+The check-in matches by description, not exact wording. If it is ambiguous, it shows you what it found before updating.
 
 ---
 
