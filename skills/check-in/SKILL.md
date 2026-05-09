@@ -8,14 +8,14 @@ description: >
   since the morning run, surfaces only new activity since the last run, and delivers
   an updated to-do list for the rest of the day.
 metadata:
-  version: "0.3.0"
+  version: "0.4.0"
 ---
 
 # Check-In
 
 The check-in is not a repeat of the morning brief. It answers three questions: What have you already done? What is new since you last checked? What still needs your attention?
 
-It reads your existing to-do file to find completed items, fetches only what has arrived since the last run, and hands you back an updated list to work from for the rest of the day.
+It reads your existing to-do file to find completed and in-progress items, fetches only what has arrived since the last run, and hands you back an updated list to work from for the rest of the day.
 
 ## Configuration
 
@@ -36,6 +36,30 @@ After the check-in completes, write the current UTC timestamp to `LAST_RUN_FILE`
 
 **If `TODO_FILE` does not exist**, the morning brief has not run yet today. Let the user know and offer to run the morning-brief skill instead. Do not proceed with the check-in.
 
+## Accepting progress updates
+
+The user may tell you about progress they have made during the check-in. Listen for any of these patterns:
+
+- "I made progress on X"
+- "I started working on X"
+- "I'm mid-way through X"
+- "I finished X"
+- "I haven't started X yet"
+- "I can drop X, it's no longer relevant"
+
+When the user reports progress on a task, update its state in `TODO_FILE`:
+
+| What the user says | New state |
+|--------------------|-----------|
+| Made progress, started, mid-way through | `- [>]` in progress |
+| Finished, completed, done | `- [x]` done |
+| No longer relevant, dropping, skip it | Remove the item |
+| Haven't started, still pending | `- [ ]` open (no change) |
+
+Match the task by keyword or description — do not require an exact string match. If the task is ambiguous, show the user what you found and confirm before updating.
+
+After updating states, rewrite `TODO_FILE` with the current state of all items and confirm the changes with one short sentence.
+
 ## Fetch data
 
 Make all of these calls at once in a single message:
@@ -43,6 +67,7 @@ Make all of these calls at once in a single message:
 **Existing to-do file**
 Read `TODO_FILE`. Separate items into:
 - `DONE_ITEMS`: lines matching `- [x]` -- things the user has completed
+- `INPROGRESS_ITEMS`: lines matching `- [>]` -- things actively being worked on
 - `OPEN_ITEMS`: lines matching `- [ ]` -- things still pending
 
 **Gmail**
@@ -64,16 +89,16 @@ Write each section as plain prose with short paragraphs. Direct and warm, but no
 
 Open with what the user has already done. This is the wins section and it comes first -- before the to-do list, before the new items.
 
-List each item from `DONE_ITEMS`. Then write one direct sentence acknowledging the progress and stating how many open items remain. Keep the tone grounded and genuine.
+List each item from `DONE_ITEMS`. If there are `INPROGRESS_ITEMS`, list those separately with a brief note that they are underway. Then write one direct sentence acknowledging the progress and stating how many open items remain.
 
 Good examples:
-- "Four things done since this morning. Three still open."
-- "You have cleared everything from the inbox action items. Two meeting follow-ups still on the list."
+- "Four things done since this morning. Two more in progress. Three still to start."
+- "You have cleared the inbox action items and you are mid-way through the Q3 forecast. Two items still open."
 
 Not this:
 - "Amazing work! You are crushing it!"
 
-If `DONE_ITEMS` is empty, skip this section entirely. Do not manufacture praise for nothing completed.
+If `DONE_ITEMS` is empty and `INPROGRESS_ITEMS` is empty, skip this section entirely. Do not manufacture praise for nothing completed.
 
 ---
 
@@ -89,15 +114,23 @@ Show only what has arrived since `SINCE`. Two subsections:
 
 **What still needs your attention**
 
-Show the current open items from `OPEN_ITEMS`, then append any new action items found in the inbox section above. This is the user's working list for the rest of the day.
+Show items in this order:
+1. `INPROGRESS_ITEMS` marked with `[>]` -- already underway, highest priority to finish
+2. `OPEN_ITEMS` -- not yet started
+3. Any new action items surfaced in the inbox section above
 
-Format as a markdown checklist. Keep it short -- if the list is long, note how many items there are and surface only the top ones by priority.
+Format as a markdown checklist using the three-state format (`- [>]`, `- [ ]`). Keep it short -- if the list is long, note how many items there are and surface only the top ones by priority.
 
 ---
 
 ## Save and deliver
 
-Rewrite `TODO_FILE` with the full updated state: `DONE_ITEMS` marked complete at the top, followed by the updated open items including any new ones. Preserve the section headers from the original file format.
+Rewrite `TODO_FILE` with the full updated state:
+- `DONE_ITEMS` marked `- [x]` at the top
+- `INPROGRESS_ITEMS` marked `- [>]` next
+- `OPEN_ITEMS` marked `- [ ]` last, including any new ones
+
+Preserve the section headers from the original file format. In-progress and open items will be picked up by the morning brief the following day.
 
 If `SEND_EMAIL` is true, send the check-in brief to the user's own Gmail address. Subject: `Command Center Check-In -- {Day}, {Date} {HH:MM}`. Body: clean HTML. Send immediately and confirm with one line.
 
