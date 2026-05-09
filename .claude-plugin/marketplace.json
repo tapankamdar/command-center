@@ -1,0 +1,14 @@
+{
+  "name": "command-center",
+  "owner": {
+    "name": "Tapan Kamdar",
+    "url": "https://www.linkedin.com/in/tkamdar/"
+  },
+  "plugins": [
+    {
+      "name": "command-center",
+      "source": "./",
+      "description": "A morning brief plugin for Claude Cowork. Pulls from Gmail, Slack, Google Calendar, Granola, Grain, and Notion into one structured daily brief with a saved to-do file. Tracks task progress across days."
+    }
+  ]
+}
