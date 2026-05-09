@@ -6,8 +6,26 @@ Save to `{OUTPUT_DIR}/todos-{BRIEF_DATE}.md`. If that file already exists, use `
 
 `OUTPUT_DIR` is resolved at runtime from the `COMMAND_CENTER_OUTPUT_DIR` environment variable, falling back to `~/Documents/Command Center/`.
 
+### Task states
+
+Three states are supported:
+
+| Marker | Meaning |
+|--------|---------|
+| `- [ ]` | Open — not started |
+| `- [>]` | In progress — partially done, carries forward automatically |
+| `- [x]` | Done — complete |
+
+When the morning brief runs on a new day, it reads the previous day's file and carries forward all `- [ ]` and `- [>]` items. Done items are not carried forward. In-progress items appear at the top of the carried-forward section so the day starts with awareness of what is already underway.
+
+### File format
+
 ```markdown
 # To-Dos -- [Day], [Date]
+
+## Carried forward
+- [>] [In-progress task from a prior run] (from: [date])
+- [ ] [Open task that was not completed] (from: [date])
 
 ## Replies needed
 - [ ] [Name] is waiting on [topic] -- [what you need to say or decide]
@@ -19,7 +37,7 @@ Save to `{OUTPUT_DIR}/todos-{BRIEF_DATE}.md`. If that file already exists, use `
 - [ ] [Specific prep action] before [Meeting name] on [date]
 ```
 
-Omit any section that has no items.
+Omit any section that has no items. If there are no carried-forward items, omit that section entirely.
 
 ## How to write a drafted reply
 
