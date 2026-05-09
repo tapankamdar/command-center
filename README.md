@@ -6,19 +6,12 @@ A morning brief plugin for Claude Cowork. Pulls from your inbox, calendar, and m
 
 ## Installation
 
-### Claude Cowork (recommended)
+### Claude Cowork
 
-**Option A — Install from the .plugin file:**
 1. Download `command-center.plugin` from the [Releases](https://github.com/tapankamdar/command-center/releases) page
 2. Open **Customize** in Cowork (bottom-left corner)
 3. Go to **Browse plugins → Personal → +**
 4. Select the downloaded `.plugin` file
-
-**Option B — Install from GitHub:**
-1. Open **Customize** in Cowork (bottom-left corner)
-2. Go to **Browse plugins → Personal → +**
-3. Select **Add marketplace from GitHub**
-4. Enter: `tapankamdar/command-center`
 
 ### Claude Code (CLI)
 
@@ -238,3 +231,4 @@ MIT — see [LICENSE](./LICENSE).
 ## About the author
 
 Tapan Kamdar is a product leader with 15+ years at Meta, Mozilla, GoDaddy, eBay, and Yahoo. He writes the *Building Blocks* newsletter at [linkedin.com/newsletters/7167660111300157440](https://www.linkedin.com/newsletters/7167660111300157440/) and is the author of *Level Up: From Good Product Manager to Great Product Manager* ([a.co/d/0dxmUyJJ](https://a.co/d/0dxmUyJJ)).
+
